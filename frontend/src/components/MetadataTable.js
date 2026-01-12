@@ -18,7 +18,7 @@ import {
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import SearchIcon from '@mui/icons-material/Search';
 
-const MetadataTable = ({ data, defaultColumns = ['PatientID', 'StudyDate', 'Modality'] }) => {
+const MetadataTable = ({ data, defaultColumns = ['PatientID', 'StudyDate', 'Modality', 'InstitutionName', 'StudyDescription'] }) => {
     // Convert dict to array of objects for easier handling if needed, 
     // but for a single DICOM file, we display Key-Value pairs.
     // Wait, the requirement was "dynamic tabular format". 
