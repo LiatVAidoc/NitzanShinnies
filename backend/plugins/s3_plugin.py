@@ -5,7 +5,7 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 
-from interfaces import DataSourcePlugin
+from interfaces import DataSourcePlugin, NotFoundError
 
 class S3Plugin(DataSourcePlugin):
     def __init__(self) -> None:
@@ -44,7 +44,9 @@ class S3Plugin(DataSourcePlugin):
             file_stream.seek(0)
             return file_stream
         except ClientError as e:
-            # We might want to wrap this in a custom exception later
+            error_code = e.response.get('Error', {}).get('Code')
+            if error_code == "404" or error_code == "NoSuchKey":
+                raise NotFoundError(f"S3 Key not found: {source_path}")
             raise Exception(f"S3 Error: {str(e)}")
         except Exception as e:
              raise Exception(f"Error downloading from S3: {str(e)}")

@@ -4,6 +4,7 @@ from typing import Tuple
 
 from flask import Flask, Response, jsonify, request
 from flask_cors import CORS
+from interfaces import NotFoundError
 
 from services.dicom_read_service import DicomReadService
 from services.auth_service import AuthService
@@ -32,6 +33,8 @@ def get_dicom_metadata() -> Tuple[Response, int]:
         return jsonify(metadata), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+    except NotFoundError as e:
+        return jsonify({"error": str(e)}), 404
     except Exception as e:
         # Log the full traceback for debugging
         traceback.print_exc()

@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import BinaryIO
+import io
 
 class DataSourcePlugin(ABC):
     @abstractmethod
-    def get_dicom_file(self, source_path: str) -> BinaryIO:
+    def get_dicom_file(self, source_path: str) -> io.BytesIO:
         """
         Retrieves a DICOM file from the source.
         
@@ -41,3 +42,7 @@ class IDPPlugin(ABC):
             A dictionary containing user information (e.g. {'sub': 'user_id', 'email': '...'})
         """
         pass # pragma: no cover
+
+class NotFoundError(Exception):
+    """Raised when a resource is not found."""
+    pass
