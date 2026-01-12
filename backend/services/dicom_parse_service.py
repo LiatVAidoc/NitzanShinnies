@@ -27,10 +27,19 @@ class DicomParseService:
             value = elem.value
             
             # Convert non-serializable types to strings/lists
-            if hasattr(value, "decode"):
+            if isinstance(value, bytes):
                 value = value.decode("utf-8", "ignore")
+            elif hasattr(value, "decode") and not isinstance(value, (str, int, float, bool)): 
+                 # Fallback for other decodable types that remain, but PersonName might be str subclass
+                 try:
+                     value = value.decode("utf-8", "ignore")
+                 except TypeError:
+                     # If decode exists but signature doesn't match or it's not needed
+                     value = str(value)
             elif isinstance(value, (list, tuple)):
                 value = [str(v) for v in value]
+            elif not isinstance(value, (str, int, float, bool, type(None))):
+                 value = str(value)
             elif not isinstance(value, (str, int, float, bool, type(None))):
                  value = str(value)
                  

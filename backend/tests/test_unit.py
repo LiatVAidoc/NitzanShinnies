@@ -86,6 +86,40 @@ class TestDicomParseService:
         assert result["BytesValue"] == "decoded_string"
 
     @patch('services.dicom_parse_service.dcmread')
+    def test_parse_metadata_person_name_error(self, mock_dcmread):
+        # Mock dataset with a PersonName-like object that fails on decode with 3 args
+        mock_ds = MagicMock()
+        
+        # Simulate pydicom PersonName: it has a decode method but maybe different signature
+        # The error was: "takes from 1 to 2 positional arguments but 3 were given"
+        # meaning decode(self) or decode(self, encoding) but we called decode(encoding, errors)
+        
+        class MockPersonName:
+            def __init__(self, name):
+                self.name = name
+            
+            def decode(self, encoding=None):
+                # This mock signature mimics what implies the error: 
+                # takes 1 (self) to 2 (self, encoding) args.
+                return self.name
+            
+            def __str__(self):
+                return self.name
+
+        elem1 = MagicMock()
+        elem1.keyword = "PatientName"
+        elem1.VR = "PN"
+        elem1.value = MockPersonName("Doe^John")
+
+        mock_ds.__iter__.return_value = [elem1]
+        mock_dcmread.return_value = mock_ds
+        
+        # This should fail if the bug exists
+        result = DicomParseService.parse_metadata("dummy")
+        
+        assert result["PatientName"] == "Doe^John"
+
+    @patch('services.dicom_parse_service.dcmread')
     def test_parse_metadata_filtering(self, mock_dcmread):
         # Mock dataset
         mock_ds = MagicMock()
