@@ -143,6 +143,14 @@ class TestDicomParseService:
         assert result == {"PatientID": "123"}
         assert "StudyDate" not in result
 
+def test_get_common_fields(client):
+    response = client.get('/api/common-fields')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert isinstance(data, list)
+    assert "PatientID" in data
+    assert "Modality" in data
+
 # --- S3Plugin Tests ---
 class TestS3Plugin:
     @patch('plugins.s3_plugin.boto3')

@@ -33,3 +33,22 @@ class DicomReadService:
             return metadata
         finally:
             dicom_file_stream.close()
+
+    def get_common_fields(self) -> List[str]:
+        """
+        Returns a list of common DICOM fields.
+        In a real scenario, this could be statistically generated from processed files.
+        For this exercise, it returns a mock list based on typical usage.
+        """
+        return [
+            "PatientID",
+            "PatientName",
+            "StudyDescription",
+            "SeriesDescription",
+            "StudyDate",
+            "Modality",
+            "InstitutionName",
+            "Manufacturer",
+            "AccessionNumber",
+            "ReferringPhysicianName"
+        ]

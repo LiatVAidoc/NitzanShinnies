@@ -13,4 +13,31 @@ class DataSourcePlugin(ABC):
         Returns:
             A file-like object containing the DICOM data.
         """
+        return None # pragma: no cover
+
+class IDPPlugin(ABC):
+    @abstractmethod
+    def get_login_url(self, state: str) -> str:
+        """
+        Returns the URL to redirect the user to for login.
+        
+        Args:
+            state: A random string to protect against CSRF attacks.
+            
+        Returns:
+            The URL to redirect the user to.
+        """
+        pass # pragma: no cover
+
+    @abstractmethod
+    def exchange_code(self, code: str) -> dict:
+        """
+        Exchanges the auth code for user info/tokens.
+        
+        Args:
+            code: The authorization code received from the IDP.
+            
+        Returns:
+            A dictionary containing user information (e.g. {'sub': 'user_id', 'email': '...'})
+        """
         pass # pragma: no cover
