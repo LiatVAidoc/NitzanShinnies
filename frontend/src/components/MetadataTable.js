@@ -70,11 +70,12 @@ const MetadataTable = ({ data, filename, defaultColumns = ['PatientID', 'StudyDa
         <Box display="flex" flexDirection="column" height="100%">
             <Box display="flex" justifyContent="space-between" alignItems="center" p={2} borderBottom="1px solid #e0e0e0">
                 <Box display="flex" alignItems="center" gap={2}>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>Metadata</Typography>
-                    {filename && (
-                        <Typography variant="subtitle2" sx={{ color: 'text.secondary', bgcolor: '#f0f0f0', px: 1, py: 0.5, borderRadius: 1 }}>
-                            {filename}
+                    {filename ? (
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            Viewing <Box component="span" color="primary.main">{filename}</Box>
                         </Typography>
+                    ) : (
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>Metadata</Typography>
                     )}
                 </Box>
                 <Box>

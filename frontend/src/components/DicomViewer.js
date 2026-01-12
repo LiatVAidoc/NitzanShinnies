@@ -6,16 +6,32 @@ import {
     Typography,
     Alert,
     CircularProgress,
-    Paper
+    Paper,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    FormControlLabel,
+    Switch
 } from '@mui/material';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { fetchMetadata } from '../api/dicomApi';
 import MetadataTable from './MetadataTable';
 
 const DicomViewer = () => {
+    // Input state
     const [path, setPath] = useState('');
+
+    // Loaded state (for display)
+    const [loadedPath, setLoadedPath] = useState('');
     const [metadata, setMetadata] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    // Advanced Loading State
+    const [openConfig, setOpenConfig] = useState(false);
+    const [loadAllFields, setLoadAllFields] = useState(true);
+    const [customFields, setCustomFields] = useState(''); // Comma separated string
 
     const handleSearch = async () => {
         if (!path.trim()) return;
@@ -23,10 +39,18 @@ const DicomViewer = () => {
         setLoading(true);
         setError(null);
         setMetadata(null);
+        setLoadedPath(''); // Reset loaded path until success
 
         try {
-            const data = await fetchMetadata(path);
+            // Prepare fields argument
+            let fieldsToLoad = null;
+            if (!loadAllFields && customFields.trim()) {
+                fieldsToLoad = customFields.split(',').map(f => f.trim()).filter(Boolean);
+            }
+
+            const data = await fetchMetadata(path, fieldsToLoad);
             setMetadata(data);
+            setLoadedPath(path);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -40,7 +64,7 @@ const DicomViewer = () => {
         }
     };
 
-    const filename = metadata ? path.split('/').pop() : '';
+    const filename = loadedPath ? loadedPath.split('/').pop() : '';
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', bgcolor: '#f5f5f5', p: 3 }}>
@@ -50,6 +74,8 @@ const DicomViewer = () => {
                     <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 500 }}>
                         DICOM Metadata Viewer
                     </Typography>
+
+                    {/* Input Area */}
                     <Box display="flex" gap={2}>
                         <TextField
                             fullWidth
@@ -64,6 +90,14 @@ const DicomViewer = () => {
                             sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                         />
                         <Button
+                            variant="outlined"
+                            onClick={() => setOpenConfig(true)}
+                            sx={{ minWidth: '40px', borderRadius: 2 }}
+                            aria-label="Load Configuration"
+                        >
+                            <SettingsIcon />
+                        </Button>
+                        <Button
                             variant="contained"
                             onClick={handleSearch}
                             disabled={loading || !path.trim()}
@@ -73,6 +107,12 @@ const DicomViewer = () => {
                             {loading ? <CircularProgress size={24} color="inherit" /> : 'Load'}
                         </Button>
                     </Box>
+
+                    {/* Loading Config Summary */}
+                    <Typography variant="caption" color="text.secondary">
+                        Loading Mode: {loadAllFields ? 'All Fields' : `Custom Fields (${customFields ? customFields.split(',').length : 0})`}
+                    </Typography>
+
                     {error && (
                         <Alert severity="error" onClose={() => setError(null)} sx={{ borderRadius: 2 }}>
                             {error}
@@ -85,6 +125,40 @@ const DicomViewer = () => {
             <Paper elevation={0} sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: 3 }}>
                 <MetadataTable data={metadata} filename={filename} />
             </Paper>
+
+            {/* Configuration Modal */}
+            <Dialog open={openConfig} onClose={() => setOpenConfig(false)} fullWidth maxWidth="sm">
+                <DialogTitle>Load Configuration</DialogTitle>
+                <DialogContent>
+                    <Box display="flex" flexDirection="column" gap={2} pt={1}>
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={loadAllFields}
+                                    onChange={(e) => setLoadAllFields(e.target.checked)}
+                                />
+                            }
+                            label="Load all fields"
+                        />
+
+                        {!loadAllFields && (
+                            <TextField
+                                label="Specific Fields (comma separated)"
+                                multiline
+                                rows={4}
+                                placeholder="PatientID, StudyDate, Modality..."
+                                fullWidth
+                                value={customFields}
+                                onChange={(e) => setCustomFields(e.target.value)}
+                                helperText="Enter the DICOM tags you wish to retrieve, separated by commas."
+                            />
+                        )}
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenConfig(false)}>Close</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };

@@ -42,3 +42,26 @@ def test_persistent_table_placeholder(page: Page, base_url):
     placeholder = page.locator('text=No metadata loaded. Please enter a path and click Load.')
     expect(placeholder).to_be_visible()
 
+def test_custom_fields_loading(page: Page, base_url):
+    page.goto(base_url)
+    
+    # Open Settings
+    # Use robust selector via aria-label
+    page.click('button[aria-label="Load Configuration"]')
+    
+    # Check Dialog
+    expect(page.locator('text=Load Configuration')).to_be_visible()
+    
+    # Toggle off "Load all fields"
+    page.click('input[type="checkbox"]') # Switch
+    
+    # Enter fields
+    page.fill('textarea', 'PatientID')
+    
+    # Close
+    page.click('text=Close')
+    
+    # Now verify the text changed (Loading Mode: Custom Fields)
+    expect(page.locator('text=Custom Fields')).to_be_visible()
+
+
