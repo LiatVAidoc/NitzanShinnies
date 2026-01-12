@@ -34,3 +34,11 @@ def test_initial_ui_state(page: Page, base_url):
     # Check Button Disabled State (Initially Empty)
     load_button = page.locator('button', has_text="Load")
     expect(load_button).to_be_disabled()
+
+def test_persistent_table_placeholder(page: Page, base_url):
+    page.goto(base_url)
+    
+    # Verify placeholder text exists when no data is loaded
+    placeholder = page.locator('text=No metadata loaded. Please enter a path and click Load.')
+    expect(placeholder).to_be_visible()
+

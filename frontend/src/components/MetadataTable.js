@@ -19,21 +19,6 @@ import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import SearchIcon from '@mui/icons-material/Search';
 
 const MetadataTable = ({ data, defaultColumns = ['PatientID', 'StudyDate', 'Modality', 'InstitutionName', 'StudyDescription'] }) => {
-    // Convert dict to array of objects for easier handling if needed, 
-    // but for a single DICOM file, we display Key-Value pairs.
-    // Wait, the requirement was "dynamic tabular format". 
-    // If we receive a single object {Key: Value}, the table should probably just show Rows of [Tag Name | Value].
-    // BUT, the columns selector requirement "The table will include a feature to show/hide columns" implies we might be listing MULTIPLE DICOM files?
-    // Or, more likely for a single file viewer, we want to filter WHICH Tags are shown.
-    // "Initially, only the columns matching the backend's DEFAULT_TAGS will be visible." 
-    // -> This suggests the "Columns" are actually the "Keys" (Metadata Tags).
-
-    // So the table would look like: 
-    // | Tag Name | Value |
-    // And the "Columns Selector" essentially filters the rows based on the Tag Name.
-
-    // Let's implement it as a Key-Value table where "Visible Columns" controls which KEYS are displayed.
-
     const [visibleKeys, setVisibleKeys] = useState(defaultColumns);
     const [anchorEl, setAnchorEl] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -42,14 +27,10 @@ const MetadataTable = ({ data, defaultColumns = ['PatientID', 'StudyDate', 'Moda
     const allKeys = data ? Object.keys(data) : [];
 
     useEffect(() => {
-        // If default columns are provided, ensure they are visible.
-        // Also, if data has keys that are in defaultColumns, show them.
-        // If data has new keys not in default, they start hidden.
-        // If no defaults, maybe show all?
         if (data && visibleKeys.length === 0 && defaultColumns.length === 0) {
             setVisibleKeys(Object.keys(data));
         }
-    }, [data]);
+    }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleOpenMenu = (event) => {
         setAnchorEl(event.currentTarget);
@@ -72,27 +53,21 @@ const MetadataTable = ({ data, defaultColumns = ['PatientID', 'StudyDate', 'Moda
     const open = Boolean(anchorEl);
 
     if (!data || Object.keys(data).length === 0) {
-        return <Typography variant="body1">No metadata to display.</Typography>;
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" height="100%" color="text.secondary">
+                <Typography variant="h6">No metadata loaded. Please enter a path and click Load.</Typography>
+            </Box>
+        );
     }
 
-    // Filter keys based on visibility AND search term
     const filteredKeys = allKeys.filter(key => {
         const isVisible = visibleKeys.includes(key);
         const matchesSearch = key.toLowerCase().includes(searchTerm) || String(data[key]).toLowerCase().includes(searchTerm);
-
-        // If we are "Searching", we might want to show hidden keys that match?
-        // Or strict "Visible Columns" filtering?
-        // "The table will include a feature to show/hide columns"
-        // Usually "Column Selector" is strict.
-        // Let's stick to: Only show visible keys.
         return isVisible && matchesSearch;
     }).sort();
 
-    // Also we need to let the user enable other keys if they want.
-    // The popover lists ALL keys to toggle.
-
     return (
-        <Box>
+        <Box display="flex" flexDirection="column" height="100%">
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h6">Metadata</Typography>
                 <Box>
@@ -146,19 +121,19 @@ const MetadataTable = ({ data, defaultColumns = ['PatientID', 'StudyDate', 'Moda
                 </Box>
             </Popover>
 
-            <TableContainer component={Paper}>
-                <Table size="small">
+            <TableContainer component={Paper} sx={{ flex: 1, overflow: 'auto' }}>
+                <Table stickyHeader size="small">
                     <TableHead>
                         <TableRow>
-                            <TableCell><strong>Tag Name</strong></TableCell>
+                            <TableCell style={{ width: '30%' }}><strong>Tag Name</strong></TableCell>
                             <TableCell><strong>Value</strong></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {filteredKeys.map((key) => (
                             <TableRow key={key}>
-                                <TableCell>{key}</TableCell>
-                                <TableCell>{String(data[key])}</TableCell>
+                                <TableCell component="th" scope="row">{key}</TableCell>
+                                <TableCell style={{ wordBreak: 'break-all' }}>{String(data[key])}</TableCell>
                             </TableRow>
                         ))}
                         {filteredKeys.length === 0 && (
