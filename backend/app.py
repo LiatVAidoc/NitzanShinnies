@@ -3,10 +3,12 @@ import traceback
 from typing import Tuple
 
 from flask import Flask, Response, jsonify, request
+from flask_cors import CORS
 
 from services.dicom_read_service import DicomReadService
 
 app = Flask(__name__)
+CORS(app) # Enable CORS for all routes
 
 @app.route('/health', methods=['GET'])
 def health() -> Tuple[Response, int]:
