@@ -1,0 +1,19 @@
+backend/secrets.json
+backend/node/secrets.json
+backend/python/secrets.json
+
+# Node
+node_modules/
+
+# Python
+venv/
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+

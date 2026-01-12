@@ -1,0 +1,4 @@
+include:
+  # Do not remove this include. This runs Security Pipeline
+  - project: 'aidoc-git/devops/devops-shared/aidoc-gitlab-templates'
+    file: 'aidoc-pipeline-base.gitlab-ci.yml'
