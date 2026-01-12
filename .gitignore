@@ -1,19 +1,30 @@
+# Security
+secrets.json
 backend/secrets.json
 backend/node/secrets.json
 backend/python/secrets.json
+.env
 
 # Node
 node_modules/
 
 # Python
 venv/
-*.pyc
+.venv
+ENV/
+*.py[cod]
+*$py.class
 __pycache__/
 .pytest_cache/
+.coverage
+htmlcov/
+coverage.json
 
-# IDEs and editors
-.vscode/
+# OS
+.DS_Store
+
+# IDE
 .idea/
+.vscode/
 *.swp
 *.swo
-
