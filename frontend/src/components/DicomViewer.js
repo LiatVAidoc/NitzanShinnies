@@ -6,9 +6,7 @@ import {
     Typography,
     Alert,
     CircularProgress,
-    Paper,
-    AppBar,
-    Toolbar
+    Paper
 } from '@mui/material';
 import { fetchMetadata } from '../api/dicomApi';
 import MetadataTable from './MetadataTable';
@@ -45,11 +43,11 @@ const DicomViewer = () => {
     const filename = metadata ? path.split('/').pop() : '';
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', bgcolor: '#f5f5f5', p: 3 }}>
             {/* Top Section: Fetch and Actions */}
-            <Paper elevation={3} square sx={{ p: 2, zIndex: 1 }}>
+            <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid #e0e0e0', borderRadius: 3 }}>
                 <Box display="flex" flexDirection="column" gap={2}>
-                    <Typography variant="h5" component="h1" gutterBottom>
+                    <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 500 }}>
                         DICOM Metadata Viewer
                     </Typography>
                     <Box display="flex" gap={2}>
@@ -63,33 +61,30 @@ const DicomViewer = () => {
                             onKeyPress={handleKeyPress}
                             placeholder="e.g., my-bucket/path/to/image.dcm"
                             disabled={loading}
+                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                         />
                         <Button
                             variant="contained"
                             onClick={handleSearch}
                             disabled={loading || !path.trim()}
-                            sx={{ minWidth: '100px' }}
+                            sx={{ minWidth: '100px', borderRadius: 2, textTransform: 'none', fontSize: '1rem' }}
+                            disableElevation
                         >
                             {loading ? <CircularProgress size={24} color="inherit" /> : 'Load'}
                         </Button>
                     </Box>
                     {error && (
-                        <Alert severity="error" onClose={() => setError(null)}>
+                        <Alert severity="error" onClose={() => setError(null)} sx={{ borderRadius: 2 }}>
                             {error}
                         </Alert>
-                    )}
-                    {filename && (
-                        <Typography variant="subtitle1" color="primary" sx={{ fontWeight: 'bold' }}>
-                            File: {filename}
-                        </Typography>
                     )}
                 </Box>
             </Paper>
 
             {/* Bottom Section: Table View */}
-            <Box sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', p: 2, bgcolor: '#f5f5f5' }}>
-                <MetadataTable data={metadata} />
-            </Box>
+            <Paper elevation={0} sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: 3 }}>
+                <MetadataTable data={metadata} filename={filename} />
+            </Paper>
         </Box>
     );
 };
