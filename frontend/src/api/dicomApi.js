@@ -25,3 +25,17 @@ export const fetchMetadata = async (path, fields = null) => {
         throw new Error(error.message || 'Failed to fetch metadata');
     }
 };
+
+/**
+ * Fetches common DICOM fields from the backend.
+ * @returns {Promise<Array<string>>} - List of common fields.
+ */
+export const fetchCommonFields = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/common-fields`);
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch common fields', error);
+        return [];
+    }
+};

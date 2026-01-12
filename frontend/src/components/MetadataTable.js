@@ -13,7 +13,8 @@ import {
     Checkbox,
     Box,
     Typography,
-    TextField
+    TextField,
+    Tooltip
 } from '@mui/material';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import SearchIcon from '@mui/icons-material/Search';
@@ -109,24 +110,79 @@ const MetadataTable = ({ data, filename, defaultColumns = ['PatientID', 'StudyDa
                     horizontal: 'right',
                 }}
                 PaperProps={{
-                    style: { maxHeight: '300px', width: '250px', overflowY: 'auto', borderRadius: 8 }
+                    style: { width: '320px', borderRadius: 8, display: 'flex', flexDirection: 'column' }
                 }}
             >
-                <Box p={2} display="flex" flexDirection="column">
-                    <Typography variant="subtitle2" gutterBottom>Show/Hide Fields</Typography>
-                    {allKeys.sort().map((key) => (
-                        <FormControlLabel
-                            key={key}
-                            control={
-                                <Checkbox
-                                    checked={visibleKeys.includes(key)}
-                                    onChange={() => toggleKey(key)}
-                                    size="small"
-                                />
-                            }
-                            label={key}
-                        />
-                    ))}
+                <Box p={2} pb={1} sx={{ borderBottom: '1px solid #e0e0e0', bgcolor: 'background.paper', zIndex: 1 }}>
+                    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main', pl: 0.5 }}>
+                        Show/Hide Fields
+                    </Typography>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={visibleKeys.length === allKeys.length && allKeys.length > 0}
+                                indeterminate={visibleKeys.length > 0 && visibleKeys.length < allKeys.length}
+                                onChange={(e) => {
+                                    if (e.target.checked) {
+                                        setVisibleKeys(allKeys);
+                                    } else {
+                                        setVisibleKeys([]);
+                                    }
+                                }}
+                                size="small"
+                                color="primary"
+                            />
+                        }
+                        label={<Typography variant="body2" fontWeight="500">Select All</Typography>}
+                        sx={{
+                            mr: 0,
+                            py: 0.5,
+                            width: '100%',
+                            '&:hover': { bgcolor: 'action.hover', borderRadius: 1 }
+                        }}
+                    />
+                </Box>
+
+                <Box p={2} pt={1} sx={{ overflowY: 'auto', maxHeight: '400px' }}>
+                    <Box display="flex" flexDirection="column" gap={0.5}>
+                        {allKeys.sort().map((key) => (
+                            <FormControlLabel
+                                key={key}
+                                control={
+                                    <Checkbox
+                                        checked={visibleKeys.includes(key)}
+                                        onChange={() => toggleKey(key)}
+                                        size="small"
+                                    />
+                                }
+                                label={
+                                    <Tooltip title={key} placement="left" arrow>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                display: 'block',
+                                                maxWidth: '230px'
+                                            }}
+                                        >
+                                            {key}
+                                        </Typography>
+                                    </Tooltip>
+                                }
+                                sx={{
+                                    mr: 0,
+                                    py: 0.25,
+                                    width: '100%',
+                                    '&:hover': { bgcolor: 'action.hover', borderRadius: 1 },
+                                    // Default flex behavior aligns items effectively to the start.
+                                    // Ensuring text takes available space but doesn't force space-between
+                                    '& .MuiFormControlLabel-label': { width: '100%', overflow: 'hidden' }
+                                }}
+                            />
+                        ))}
+                    </Box>
                 </Box>
             </Popover>
 

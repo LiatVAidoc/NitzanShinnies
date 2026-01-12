@@ -12,10 +12,15 @@ import {
     DialogContent,
     DialogActions,
     FormControlLabel,
-    Switch
+    Switch,
+    Radio,
+    RadioGroup,
+    Chip,
+    FormLabel,
+    FormControl
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { fetchMetadata } from '../api/dicomApi';
+import { fetchMetadata, fetchCommonFields } from '../api/dicomApi';
 import MetadataTable from './MetadataTable';
 
 const DicomViewer = () => {
@@ -30,8 +35,26 @@ const DicomViewer = () => {
 
     // Advanced Loading State
     const [openConfig, setOpenConfig] = useState(false);
-    const [loadAllFields, setLoadAllFields] = useState(true);
+    const [loadingMode, setLoadingMode] = useState('all'); // 'all' | 'custom'
     const [customFields, setCustomFields] = useState(''); // Comma separated string
+    const [commonFields, setCommonFields] = useState([]);
+
+    React.useEffect(() => {
+        const loadCommonFields = async () => {
+            const fields = await fetchCommonFields();
+            setCommonFields(fields);
+        };
+        loadCommonFields();
+    }, []);
+
+    const toggleCommonField = (field) => {
+        const currentFields = customFields.split(',').map(f => f.trim()).filter(Boolean);
+        if (currentFields.includes(field)) {
+            setCustomFields(currentFields.filter(f => f !== field).join(', '));
+        } else {
+            setCustomFields([...currentFields, field].join(', '));
+        }
+    };
 
     const handleSearch = async () => {
         if (!path.trim()) return;
@@ -44,7 +67,7 @@ const DicomViewer = () => {
         try {
             // Prepare fields argument
             let fieldsToLoad = null;
-            if (!loadAllFields && customFields.trim()) {
+            if (loadingMode === 'custom' && customFields.trim()) {
                 fieldsToLoad = customFields.split(',').map(f => f.trim()).filter(Boolean);
             }
 
@@ -67,13 +90,11 @@ const DicomViewer = () => {
     const filename = loadedPath ? loadedPath.split('/').pop() : '';
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', bgcolor: '#f5f5f5', p: 3 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', bgcolor: '#f5f5f5', p: 3 }}>
             {/* Top Section: Fetch and Actions */}
             <Paper elevation={0} sx={{ p: 3, mb: 3, border: '1px solid #e0e0e0', borderRadius: 3 }}>
                 <Box display="flex" flexDirection="column" gap={2}>
-                    <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 500 }}>
-                        DICOM Metadata Viewer
-                    </Typography>
+
 
                     {/* Input Area */}
                     <Box display="flex" gap={2}>
@@ -110,7 +131,7 @@ const DicomViewer = () => {
 
                     {/* Loading Config Summary */}
                     <Typography variant="caption" color="text.secondary">
-                        Loading Mode: {loadAllFields ? 'All Fields' : `Custom Fields (${customFields ? customFields.split(',').length : 0})`}
+                        Loading Mode: {loadingMode === 'all' ? 'All Fields' : `Custom Fields (${customFields ? customFields.split(',').length : 0})`}
                     </Typography>
 
                     {error && (
@@ -128,30 +149,58 @@ const DicomViewer = () => {
 
             {/* Configuration Modal */}
             <Dialog open={openConfig} onClose={() => setOpenConfig(false)} fullWidth maxWidth="sm">
+
                 <DialogTitle>Load Configuration</DialogTitle>
                 <DialogContent>
-                    <Box display="flex" flexDirection="column" gap={2} pt={1}>
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={loadAllFields}
-                                    onChange={(e) => setLoadAllFields(e.target.checked)}
-                                />
-                            }
-                            label="Load all fields"
-                        />
+                    <Box display="flex" flexDirection="column" gap={3} pt={1}>
+                        <FormControl>
+                            <FormLabel id="loading-mode-label">Fields to Load</FormLabel>
+                            <RadioGroup
+                                row
+                                aria-labelledby="loading-mode-label"
+                                name="loading-mode"
+                                value={loadingMode}
+                                onChange={(e) => setLoadingMode(e.target.value)}
+                            >
+                                <FormControlLabel value="all" control={<Radio />} label="Load All Fields" />
+                                <FormControlLabel value="custom" control={<Radio />} label="Select Custom Fields" />
+                            </RadioGroup>
+                        </FormControl>
 
-                        {!loadAllFields && (
-                            <TextField
-                                label="Specific Fields (comma separated)"
-                                multiline
-                                rows={4}
-                                placeholder="PatientID, StudyDate, Modality..."
-                                fullWidth
-                                value={customFields}
-                                onChange={(e) => setCustomFields(e.target.value)}
-                                helperText="Enter the DICOM tags you wish to retrieve, separated by commas."
-                            />
+                        {loadingMode === 'custom' && (
+                            <Box display="flex" flexDirection="column" gap={2}>
+                                <TextField
+                                    label="Selected Fields"
+                                    multiline
+                                    rows={3}
+                                    placeholder="PatientID, StudyDate..."
+                                    fullWidth
+                                    value={customFields}
+                                    onChange={(e) => setCustomFields(e.target.value)}
+                                    helperText="Type manually or select from suggestions below."
+                                />
+
+                                <Box>
+                                    <Typography variant="subtitle2" gutterBottom>
+                                        Statistical Suggestions (Common Fields)
+                                    </Typography>
+                                    <Box display="flex" flexWrap="wrap" gap={1}>
+                                        {commonFields.map((field) => {
+                                            const isSelected = customFields.includes(field);
+                                            return (
+                                                <Chip
+                                                    key={field}
+                                                    label={field}
+                                                    onClick={() => toggleCommonField(field)}
+                                                    color={isSelected ? "primary" : "default"}
+                                                    variant={isSelected ? "filled" : "outlined"}
+                                                    clickable
+                                                />
+                                            );
+                                        })}
+                                    </Box>
+                                </Box>
+                            </Box>
                         )}
                     </Box>
                 </DialogContent>

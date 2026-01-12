@@ -13,10 +13,10 @@ describe('DicomViewer', () => {
 
     test('renders initial state correctly', () => {
         render(<DicomViewer />);
-        expect(screen.getByText(/DICOM Metadata Viewer/i)).toBeInTheDocument();
+        // expect(screen.getByText(/DICOM Metadata Viewer/i)).toBeInTheDocument(); // Removed title
         // Updated label to match "S3 Path (bucket/key)"
         expect(screen.getByLabelText(/S3 Path \(bucket\/key\)/i)).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /Load/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /^Load$/i })).toBeInTheDocument();
         expect(screen.queryByRole('table')).not.toBeInTheDocument();
     });
 
@@ -30,7 +30,7 @@ describe('DicomViewer', () => {
         render(<DicomViewer />);
 
         const input = screen.getByLabelText(/S3 Path \(bucket\/key\)/i);
-        const button = screen.getByRole('button', { name: /Load/i });
+        const button = screen.getByRole('button', { name: /^Load$/i });
 
         fireEvent.change(input, { target: { value: 'test/path' } });
         fireEvent.click(button);
@@ -49,7 +49,7 @@ describe('DicomViewer', () => {
         render(<DicomViewer />);
 
         const input = screen.getByLabelText(/S3 Path \(bucket\/key\)/i);
-        const button = screen.getByRole('button', { name: /Load/i });
+        const button = screen.getByRole('button', { name: /^Load$/i });
 
         fireEvent.change(input, { target: { value: 'test/path' } });
         fireEvent.click(button);
@@ -61,7 +61,7 @@ describe('DicomViewer', () => {
 
     test('handles empty input', () => {
         render(<DicomViewer />);
-        const button = screen.getByRole('button', { name: /Load/i });
+        const button = screen.getByRole('button', { name: /^Load$/i });
         expect(button).toBeDisabled();
 
         const input = screen.getByLabelText(/S3 Path \(bucket\/key\)/i);
