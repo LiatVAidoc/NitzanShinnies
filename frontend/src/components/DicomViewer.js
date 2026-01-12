@@ -153,8 +153,8 @@ const DicomViewer = () => {
                 <DialogTitle>Load Configuration</DialogTitle>
                 <DialogContent>
                     <Box display="flex" flexDirection="column" gap={3} pt={1}>
-                        <FormControl>
-                            <FormLabel id="loading-mode-label">Fields to Load</FormLabel>
+                        <FormControl component="fieldset" sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                            <FormLabel id="loading-mode-label" sx={{ mb: 0, mr: 2 }}>Fields to Load:</FormLabel>
                             <RadioGroup
                                 row
                                 aria-labelledby="loading-mode-label"
@@ -162,8 +162,8 @@ const DicomViewer = () => {
                                 value={loadingMode}
                                 onChange={(e) => setLoadingMode(e.target.value)}
                             >
-                                <FormControlLabel value="all" control={<Radio />} label="Load All Fields" />
-                                <FormControlLabel value="custom" control={<Radio />} label="Select Custom Fields" />
+                                <FormControlLabel value="all" control={<Radio />} label="Load All" />
+                                <FormControlLabel value="custom" control={<Radio />} label="Custom" />
                             </RadioGroup>
                         </FormControl>
 
@@ -182,7 +182,7 @@ const DicomViewer = () => {
 
                                 <Box>
                                     <Typography variant="subtitle2" gutterBottom>
-                                        Statistical Suggestions (Common Fields)
+                                        Common Fields
                                     </Typography>
                                     <Box display="flex" flexWrap="wrap" gap={1}>
                                         {commonFields.map((field) => {

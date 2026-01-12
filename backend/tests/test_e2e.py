@@ -72,7 +72,7 @@ def test_custom_fields_loading(authenticated_page: Page):
     page.fill('textarea', 'PatientID')
     
     # Verify Chips are present
-    expect(page.locator('text=Statistical Suggestions')).to_be_visible()
+    expect(page.locator('text=Common Fields')).to_be_visible()
     # Expect the chip "PatientID" to be visible (it is a button)
     expect(page.locator('role=button[name="PatientID"]')).to_be_visible()
     
@@ -80,6 +80,7 @@ def test_custom_fields_loading(authenticated_page: Page):
     page.click('text=Close')
     
     # Now verify the text changed (Loading Mode: Custom Fields)
+    # The summary text logic in DicomViewer wasn't changed, but let's confirm.
     expect(page.locator('text=Loading Mode: Custom Fields')).to_be_visible()
 
 
